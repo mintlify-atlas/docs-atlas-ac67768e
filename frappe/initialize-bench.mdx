@@ -1,0 +1,78 @@
+---
+title: "Initialize the bench"
+description: "Create and initialize a Frappe bench directory, then start the development server."
+---
+
+Initializing a bench creates the directory structure Frappe needs to run. The `bench init` command sets up a Python virtual environment, installs the Frappe framework, and creates all required subdirectories.
+
+<Steps>
+  <Step title="Create the bench directory">
+    Create a working directory for your Frappe installation and move into it:
+
+    ```bash
+    mkdir frappe-bench && cd frappe-bench
+    ```
+  </Step>
+
+  <Step title="Initialize the bench">
+    Run `bench init` from inside the directory you just created:
+
+    ```bash
+    bench init frappe-bench --frappe-branch version-15
+    ```
+
+    This command:
+    - Creates a Python virtual environment under `env/`
+    - Installs the Frappe framework from the specified branch
+    - Creates `apps/`, `sites/`, `config/`, and `logs/` directories
+    - Installs JavaScript dependencies
+
+    <Note>
+      Replace `version-15` with the Frappe branch that matches your target version (for example, `version-14`). Check the [Frappe GitHub repository](https://github.com/frappe/frappe) for available branches.
+    </Note>
+  </Step>
+
+  <Step title="Add the site to your host system">
+    To access your Frappe site in a browser using a local domain, add an entry to your system hosts file:
+
+    ```bash
+    sudo nano /etc/hosts
+    ```
+
+    Add the following line at the end of the file:
+
+    ```
+    127.0.0.1	frappe.localhost
+    ```
+
+    Save the file with **Ctrl+X**, then **Y**, then **Enter**.
+  </Step>
+
+  <Step title="Start the bench">
+    From inside the `frappe-bench` directory, start all bench services:
+
+    ```bash
+    bench start
+    ```
+
+    This starts the web server, background workers, and the scheduler. You can access your site at `http://frappe.localhost:8000` once a site has been created.
+  </Step>
+</Steps>
+
+## Manage the Python environment
+
+The bench ships with an isolated Python virtual environment under `env/`. You can activate or deactivate it manually when needed.
+
+**Activate:**
+
+```bash
+source env/bin/activate
+```
+
+**Deactivate:**
+
+```bash
+source env/bin/deactivate
+```
+
+You do not need to manually activate the environment for most `bench` commands — the bench CLI handles this automatically.

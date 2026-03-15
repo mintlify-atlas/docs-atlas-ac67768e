@@ -1,0 +1,111 @@
+---
+title: "Install dependencies"
+description: "Install Git, Python, Node.js, Redis, Yarn, wkhtmltopdf, and all other required system packages on Ubuntu."
+---
+
+Work through these steps in order. Each dependency is required before you can install Frappe in a later step.
+
+<Steps>
+  <Step title="Install Git">
+    Git is the version control system used to fetch Frappe and ERPNext source code.
+
+    ```bash
+    sudo apt-get install git
+    ```
+  </Step>
+
+  <Step title="Install python-dev">
+    `python3-dev` provides the header files needed to compile Python C extensions.
+
+    ```bash
+    sudo apt-get install python3-dev
+    ```
+  </Step>
+
+  <Step title="Install setuptools and pip">
+    `setuptools` and `pip` are Python's package management tools. Frappe's installer depends on both.
+
+    ```bash
+    sudo apt-get install python3-setuptools python3-pip
+    ```
+  </Step>
+
+  <Step title="Install virtualenv">
+    `virtualenv` creates isolated Python environments so that Frappe's dependencies do not conflict with system packages.
+
+    ```bash
+    sudo apt install virtualenv
+    ```
+
+    After installing `virtualenv`, check which Python version is active on your system:
+
+    ```bash
+    python3 -V
+    ```
+
+    Then install the matching `venv` package for your Python version:
+
+    <CodeGroup>
+
+    ```bash python 3.8
+    sudo apt install python3.8-venv
+    ```
+
+    ```bash python 3.10
+    sudo apt install python3.10-venv
+    ```
+
+    </CodeGroup>
+  </Step>
+
+  <Step title="Install Redis">
+    Redis is an in-memory data store used by Frappe for caching and real-time background job updates.
+
+    ```bash
+    sudo apt-get install redis-server
+    ```
+  </Step>
+
+  <Step title="Install Node.js 20.x">
+    Node.js is required to build Frappe's frontend assets. Use the NodeSource setup script to install the 20.x release.
+
+    ```bash
+    sudo apt-get install curl
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    ```
+  </Step>
+
+  <Step title="Install Yarn">
+    Yarn is the JavaScript package manager used by Frappe's build toolchain.
+
+    ```bash
+    sudo npm install -g yarn
+    ```
+
+    <Warning>
+      If this command fails with permission errors, uninstall any existing Yarn installation and remove the binary before retrying:
+
+      ```bash
+      sudo npm uninstall -g yarn
+      sudo rm -rf /usr/bin/yarn
+      ```
+
+      Then run `sudo npm install -g yarn` again.
+    </Warning>
+  </Step>
+
+  <Step title="Install wkhtmltopdf">
+    `wkhtmltopdf` converts HTML to PDF and is required for Frappe's print and report features. The `xvfb` and `libfontconfig` packages provide the virtual display and font support it needs.
+
+    ```bash
+    sudo apt-get install xvfb libfontconfig wkhtmltopdf
+    ```
+
+    <Note>
+      Frappe requires wkhtmltopdf version 0.12.5 compiled with the patched Qt library. The package available in Ubuntu's default repositories meets this requirement.
+    </Note>
+  </Step>
+</Steps>
+
+With all dependencies installed, continue to the [Database Setup](/database/install-mariadb) section to install and configure MariaDB.

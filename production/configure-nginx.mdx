@@ -1,0 +1,63 @@
+---
+title: "Configure Nginx"
+description: "Install Nginx and configure it as a reverse proxy for your Frappe bench."
+---
+
+Nginx acts as the reverse proxy that routes incoming HTTP requests to Frappe's Gunicorn workers. The `bench setup nginx` command generates the Nginx configuration automatically based on your bench and site settings.
+
+<Steps>
+  <Step title="Install Nginx">
+    Install Nginx from the Ubuntu package repository:
+
+    ```bash
+    sudo apt -y install nginx
+    ```
+  </Step>
+
+  <Step title="Generate the Nginx configuration">
+    From inside your bench directory, generate the Nginx configuration file:
+
+    ```bash
+    bench setup nginx
+    ```
+
+    This creates `config/nginx.conf` inside your bench directory.
+  </Step>
+
+  <Step title="Create the symlink">
+    Link the generated configuration into Nginx's `conf.d` directory so Nginx picks it up:
+
+    ```bash
+    sudo ln -s `pwd`/config/nginx.conf /etc/nginx/conf.d/frappe-bench.conf
+    ```
+
+    <Warning>
+      Replace `` `pwd` `` with the absolute path to your bench directory if you are not running this command from inside it. For example: `sudo ln -s /home/dcode-frappe/frappe-bench/config/nginx.conf /etc/nginx/conf.d/frappe-bench.conf`
+    </Warning>
+  </Step>
+
+  <Step title="Reload Nginx">
+    Apply the new configuration without dropping existing connections:
+
+    ```bash
+    sudo service nginx reload
+    ```
+  </Step>
+
+  <Step title="Verify the service is running">
+    Confirm Nginx is active and loaded the configuration without errors:
+
+    ```bash
+    sudo service nginx status
+    ```
+  </Step>
+</Steps>
+
+## Reload Nginx after configuration changes
+
+Whenever you regenerate the Nginx configuration (for example, after adding a new site or changing ports), reload Nginx to apply the changes:
+
+```bash
+bench setup nginx
+sudo service nginx reload
+```

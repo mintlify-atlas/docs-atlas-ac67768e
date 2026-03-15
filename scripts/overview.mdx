@@ -1,0 +1,67 @@
+---
+title: "Automation scripts overview"
+description: "Bash scripts that automate the Frappe and ERPNext installation process, from package installation to production setup."
+---
+
+These scripts automate each stage of the Frappe/ERPNext installation process. Instead of running commands manually, you can execute a single script to complete each phase of setup.
+
+## Available scripts
+
+| Script | Purpose |
+|---|---|
+| `install_frappe_packages.sh` | Install all system packages and MariaDB |
+| `init_frappe_bench.sh` | Initialize the Frappe bench |
+| `create_frappe_site.sh` | Create a new Frappe site |
+| `config_supervisor.sh` | Configure Supervisor for a site |
+| `config_nginx.sh` | Configure Nginx for a site |
+| `config_redis.sh` | Configure Redis for a site |
+| `config_production_site.sh` | Set up production for a site |
+
+## Make scripts executable
+
+Before running any script, mark it as executable:
+
+```bash
+chmod +x install_frappe_packages.sh
+chmod +x init_frappe_bench.sh
+chmod +x create_frappe_site.sh
+chmod +x config_supervisor.sh
+chmod +x config_nginx.sh
+chmod +x config_redis.sh
+chmod +x config_production_site.sh
+```
+
+## Run the scripts
+
+Run the scripts in order to complete a full installation:
+
+```bash
+./install_frappe_packages.sh
+./init_frappe_bench.sh [frappe_branch]
+./create_frappe_site.sh [site_name] [db_type] [db_host] [db_port] [db_username] [db_password] [admin_password]
+./config_supervisor.sh [site_name]
+./config_nginx.sh [site_name]
+./config_redis.sh [site_name]
+./config_production_site.sh [site_name] [frappe_user]
+```
+
+<Note>
+  Adjust script inputs such as site name, branch, and passwords to match your environment. Read the comments inside each script to understand what each step does.
+</Note>
+
+## Script reference
+
+<CardGroup cols={2}>
+  <Card title="Install packages" icon="box" href="/scripts/install-packages">
+    Install all required system packages, MariaDB, and frappe-bench.
+  </Card>
+  <Card title="Initialize bench" icon="terminal" href="/scripts/init-bench">
+    Initialize the Frappe bench with a configurable branch.
+  </Card>
+  <Card title="Create site" icon="globe" href="/scripts/create-site">
+    Create a new Frappe site with custom database and admin credentials.
+  </Card>
+  <Card title="Configure services" icon="gear" href="/scripts/configure-services">
+    Configure Supervisor, Nginx, Redis, and production for a site.
+  </Card>
+</CardGroup>

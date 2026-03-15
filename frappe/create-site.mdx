@@ -1,0 +1,104 @@
+---
+title: "Create a site"
+description: "Create, manage, and drop Frappe sites using the bench CLI."
+---
+
+A Frappe site is an isolated instance with its own database and configuration. You can run multiple sites from the same bench installation. Use the `bench new-site` command to create a site.
+
+## Basic site creation
+
+<Steps>
+  <Step title="Create the site">
+    Run the following command from inside your `frappe-bench` directory:
+
+    ```bash
+    bench new-site dcode.com
+    ```
+
+    You will be prompted to set the MariaDB root password and an administrator password for the site.
+  </Step>
+
+  <Step title="Set the current site">
+    If you are running a single-site setup, write the site name to `currentsite.txt` so bench commands target it by default:
+
+    ```bash
+    nano sites/currentsite.txt
+    ```
+
+    Type the site name (for example, `dcode.com`) and save the file.
+  </Step>
+
+  <Step title="Start the bench">
+    ```bash
+    bench start
+    ```
+
+    Your site is now accessible in the browser at the configured hostname.
+  </Step>
+</Steps>
+
+## Advanced site creation
+
+For more control over the database configuration, pass all parameters explicitly:
+
+```bash
+bench new-site \
+  --db-name [] \
+  --db-password [] \
+  --db-type mariadb \
+  --db-host 127.0.0.1 \
+  --db-port 3306 \
+  --mariadb-root-username root \
+  --mariadb-root-password [] \
+  --no-mariadb-socket \
+  --admin-password Admin \
+  --install-app erpnext \
+  [].cybererps.com
+```
+
+Replace each `[]` placeholder with your actual value. The table below describes every parameter:
+
+| Parameter | Description |
+|---|---|
+| `--db-name` | Name of the database to create for this site. |
+| `--db-password` | Password for the site's database user. |
+| `--db-type` | Database engine to use. Accepts `mariadb` or `postgres`. |
+| `--db-host` | Hostname or IP address of the database server. |
+| `--db-port` | Port the database server listens on. Default is `3306` for MariaDB. |
+| `--mariadb-root-username` | MariaDB root username used to create the site database and user. |
+| `--mariadb-root-password` | Password for the MariaDB root user. |
+| `--no-mariadb-socket` | Connect to MariaDB over TCP instead of a Unix socket. Required when `--db-host` is an IP address. |
+| `--admin-password` | Password for the Frappe Administrator account on this site. |
+| `--install-app` | App to install on the site immediately after creation (for example, `erpnext`). |
+| Site name (positional) | The domain name used to access this site (for example, `mysite.cybererps.com`). |
+
+## Explore site commands
+
+You can run commands against a specific site using the `--site` flag:
+
+```bash
+# Open an interactive Python console in the site context
+bench --site library.test console
+
+# Open a MariaDB shell for the site's database
+bench --site library.test mariadb
+
+# Create a backup of the site
+bench --site library.test backup
+```
+
+## Drop a site
+
+<Warning>
+  Dropping a site is **irreversible**. The `--force` flag bypasses confirmation prompts and immediately deletes the site database and files. Make sure you have a backup before running this command.
+</Warning>
+
+```bash
+bench drop-site \
+  --mariadb-root-username admin@localhost \
+  --mariadb-root-password admin \
+  --force \
+  banna.com
+```
+
+Replace `banna.com` with the name of the site you want to remove, and update the MariaDB credentials to match your setup.

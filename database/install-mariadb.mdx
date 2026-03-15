@@ -1,0 +1,82 @@
+---
+title: Install MariaDB
+description: Install MariaDB 10.3 on Ubuntu 20.04 or 18.04 as the database backend for Frappe and ERPNext.
+---
+
+Frappe requires MariaDB 10.3.x as its primary database. This page walks you through installing MariaDB on Ubuntu and securing the installation.
+
+<Tabs>
+  <Tab title="Ubuntu 20.04">
+    <Steps>
+      <Step title="Add the MariaDB repository">
+        Install the required tools and add the MariaDB 10.3 repository for Ubuntu 20.04 (Focal):
+
+        ```bash
+        sudo apt-get install software-properties-common
+        sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+        sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://ftp.icm.edu.pl/pub/unix/database/mariadb/repo/10.3/ubuntu focal main'
+        sudo apt update
+        ```
+      </Step>
+
+      <Step title="Install MariaDB server">
+        ```bash
+        sudo apt install mariadb-server
+        ```
+
+        <Note>
+          During installation you may be prompted to set a root password. Record this password — you will need it later when initializing Frappe. If no prompt appears, proceed to the next step to set it manually.
+        </Note>
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Ubuntu 18.04">
+    <Steps>
+      <Step title="Add the MariaDB repository">
+        Install the required tools and add the MariaDB 10.3 repository for Ubuntu 18.04 (Bionic):
+
+        ```bash
+        sudo apt-get install software-properties-common dirmngr apt-transport-https
+        sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+        sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://mirrors.aliyun.com/mariadb/repo/10.3/ubuntu bionic main'
+        sudo apt update
+        ```
+      </Step>
+
+      <Step title="Install MariaDB server">
+        ```bash
+        sudo apt install mariadb-server
+        ```
+
+        <Note>
+          During installation you may be prompted to set a root password. Record this password — you will need it later when initializing Frappe. If no prompt appears, proceed to the next step to set it manually.
+        </Note>
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Secure the installation
+
+Run the interactive security script to set the root password, remove anonymous users, and disable remote root login:
+
+```bash
+sudo mysql_secure_installation
+```
+
+Follow the prompts to complete the hardening steps. When asked to set a root password, choose a strong password and store it securely.
+
+<Note>
+  If you encounter a connection error when trying to access MySQL as root after installation, see the [Changing the MySQL Root Password](/troubleshooting/reset-mysql-password) page.
+</Note>
+
+## Install MariaDB development files
+
+Install `libmysqlclient-dev`, which provides the C client library headers needed to compile Python's MySQL adapter:
+
+```bash
+sudo apt-get install libmysqlclient-dev
+```
+
+Once MariaDB is installed and secured, continue to [Configure MariaDB](/database/configure-mariadb) to set up Unicode support.

@@ -1,0 +1,75 @@
+---
+title: Configure MariaDB
+description: Configure MariaDB to use UTF-8 (utf8mb4) encoding for full Unicode and multi-language support in Frappe and ERPNext.
+---
+
+Frappe stores data in multiple languages and relies on full Unicode support, including characters outside the Basic Multilingual Plane (such as emoji and certain CJK characters). You must configure MariaDB to use the `utf8mb4` character set before creating any Frappe sites.
+
+<Steps>
+  <Step title="Install nano (if not already installed)">
+    If the `nano` text editor is not available on your system, install it first:
+
+    ```bash
+    sudo apt install nano
+    ```
+  </Step>
+
+  <Step title="Open the MariaDB configuration file">
+    Open `/etc/mysql/my.cnf` in your text editor:
+
+    ```bash
+    sudo nano /etc/mysql/my.cnf
+    ```
+  </Step>
+
+  <Step title="Add the Unicode configuration block">
+    Append the following lines to the end of the file. These settings force MariaDB to use `utf8mb4` encoding for all connections and storage:
+
+    ```ini
+    [mysqld]
+    character-set-client-handshake = FALSE
+    character-set-server = utf8mb4
+    collation-server = utf8mb4_unicode_ci
+
+    [mysql]
+    default-character-set = utf8mb4
+    ```
+
+    Setting `character-set-client-handshake = FALSE` prevents the client from overriding the server's character set during the handshake, ensuring consistent encoding across all connections.
+  </Step>
+
+  <Step title="Save and close the file">
+    Press `Ctrl+X`, then `Y`, then `Enter` to save and exit nano.
+  </Step>
+
+  <Step title="Restart MariaDB">
+    Apply the new configuration by restarting the MariaDB service:
+
+    ```bash
+    sudo service mysql restart
+    ```
+
+    <Warning>
+      Restarting MariaDB will briefly interrupt all active database connections. In a production environment, schedule this restart during a maintenance window. On a fresh installation, it is safe to restart immediately.
+    </Warning>
+  </Step>
+
+  <Step title="Verify the character set">
+    Connect to MariaDB and confirm the settings took effect:
+
+    ```bash
+    sudo mysql -u root -p
+    ```
+
+    Then run:
+
+    ```sql
+    SHOW VARIABLES LIKE 'character_set_server';
+    SHOW VARIABLES LIKE 'collation_server';
+    ```
+
+    Both should return `utf8mb4` and `utf8mb4_unicode_ci` respectively. Type `EXIT;` to leave the MySQL shell.
+  </Step>
+</Steps>
+
+With Unicode support configured, continue to [Manage MySQL Users](/database/manage-mysql-users) or proceed to [Install Frappe Bench](/frappe/install-frappe-bench).

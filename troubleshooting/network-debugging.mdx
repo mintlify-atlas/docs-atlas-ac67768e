@@ -1,0 +1,91 @@
+---
+title: "Network debugging"
+description: "How to diagnose and resolve port conflicts and network issues affecting Frappe and ERPNext services."
+---
+
+Port conflicts are a common cause of service startup failures in Frappe installations. Use these commands to identify which processes are using required ports and resolve the conflicts.
+
+## Install net-tools
+
+The `netstat` command is provided by the `net-tools` package. Install it if it is not already present on your system:
+
+```bash
+sudo apt install net-tools
+```
+
+## Check which ports are in use
+
+Check whether the Frappe scheduler port (13000) or the configured Redis port (11000) are already occupied:
+
+```bash
+sudo netstat -tuln | grep '13000\|11000'
+```
+
+The output lists each matching socket with its protocol, local address, and state. An entry in `LISTEN` state means a process is already bound to that port.
+
+## Find the process using a port
+
+Use `lsof` to identify which process is bound to a specific port. Replace `13000` with the port you are investigating:
+
+```bash
+sudo lsof -i :13000
+```
+
+The output includes the process name, PID, user, and file descriptor. Note the PID from the `PID` column.
+
+## Kill a conflicting process
+
+Terminate the process using the PID identified in the previous step. Replace `27381` with the actual PID:
+
+```bash
+sudo kill 27381
+```
+
+<Warning>
+  Before killing a process, confirm that it is safe to terminate. Killing a critical system process can destabilize your server.
+</Warning>
+
+## Common Frappe ports
+
+| Service | Default port |
+|---|---|
+| Frappe / ERPNext web | 8000 |
+| Redis | 6379 (default), 11000 (configured) |
+| MariaDB | 3306 |
+| Frappe Socket.io | 9000 |
+| Frappe Scheduler | 13000 |
+
+## Redis port configuration
+
+If port 6379 is already in use on your system, configure Redis to listen on port 11000 instead.
+
+**Edit the Redis configuration file:**
+
+```bash
+sudo nano /etc/redis/redis.conf
+```
+
+**Find the `port` line and change it to 11000:**
+
+```
+# port 6379
+port 11000
+```
+
+**Restart Redis to apply the change:**
+
+```bash
+sudo service redis-server restart
+```
+
+**Test that Redis is responding on the new port:**
+
+```bash
+redis-cli -h localhost -p 11000 ping
+```
+
+A `PONG` response confirms Redis is listening correctly on port 11000.
+
+<Note>
+  After changing the Redis port, update your Frappe bench configuration to use the new port so that the Frappe workers and scheduler can connect to Redis.
+</Note>

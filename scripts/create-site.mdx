@@ -1,0 +1,88 @@
+---
+title: "Create site script"
+description: "The create_frappe_site.sh script creates a new Frappe site with configurable database and admin credentials."
+---
+
+The `create_frappe_site.sh` script runs `bench new-site` with all the required flags to connect to your database and set an admin password. You can pass every value as a positional argument or let the script prompt you for sensitive credentials.
+
+## How to run
+
+```bash
+./create_frappe_site.sh [site_name] [db_type] [db_host] [db_port] [db_username] [db_password] [admin_password]
+```
+
+## Parameters
+
+| Parameter | Required | Default | Description |
+|---|---|---|---|
+| `site_name` | Yes | — | The name of the site to create (used as the database name) |
+| `db_type` | No | `mariadb` | Database type (`mariadb` or `postgres`) |
+| `db_host` | No | `localhost` | Hostname of the database server |
+| `db_port` | No | `3306` | Port of the database server |
+| `db_username` | No | `root` | Database root username |
+| `db_password` | No | prompted | Database root password — prompted interactively if omitted |
+| `admin_password` | No | prompted | Frappe administrator password — prompted interactively if omitted |
+
+## Example
+
+```bash
+./create_frappe_site.sh mysite.local mariadb localhost 3306 root mydbpassword myadminpassword
+```
+
+## Script source
+
+```bash
+#!/bin/bash
+
+# Input:
+#   - Site name: Required
+#   - Database type (optional): Default to mariadb
+#   - Database host (optional): Default to localhost
+#   - Database port (optional): Default to 3306
+#   - Database username (optional): Default to root
+#   - Database password (optional): Prompt for input if not provided
+#   - Admin password (optional): Prompt for input if not provided
+SITE_NAME="$1"
+DB_TYPE="${2:-mariadb}"
+DB_HOST="${3:-localhost}"
+DB_PORT="${4:-3306}"
+DB_USERNAME="${5:-root}"
+DB_PASSWORD="${6}"
+ADMIN_PASSWORD="${7}"
+
+# Prompt for database password if not provided
+if [ -z "$DB_PASSWORD" ]; then
+  read -p "Enter database password: " DB_PASSWORD
+fi
+
+# Prompt for admin password if not provided
+if [ -z "$ADMIN_PASSWORD" ]; then
+  read -p "Enter admin password: " ADMIN_PASSWORD
+fi
+
+# Create the new site
+bench new-site --db-name ${SITE_NAME} --db-password ${DB_PASSWORD} \
+  --db-type ${DB_TYPE} --db-host ${DB_HOST} --db-port ${DB_PORT} \
+  --mariadb-root-username ${DB_USERNAME} --mariadb-root-password ${DB_PASSWORD} \
+  --no-mariadb-socket --admin-password ${ADMIN_PASSWORD}
+
+echo "New site '${SITE_NAME}' created successfully!"
+```
+
+## What the script does
+
+<Steps>
+  <Step title="Read parameters">
+    Reads up to seven positional arguments. `site_name` is required. All database connection values default to a local MariaDB installation if not provided.
+  </Step>
+  <Step title="Prompt for missing passwords">
+    If `db_password` or `admin_password` were not passed as arguments, the script prompts you to enter them interactively so they are not exposed in your shell history.
+  </Step>
+  <Step title="Create the site">
+    Runs `bench new-site` with the `--no-mariadb-socket` flag, which tells Frappe to connect over TCP instead of a Unix socket — required on most standard installations.
+  </Step>
+</Steps>
+
+<Warning>
+  Run this script from inside the `frappe-bench/` directory. The `bench` command must be available in your current path.
+</Warning>

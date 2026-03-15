@@ -1,0 +1,120 @@
+---
+title: "Service management"
+description: "Commands for managing MariaDB, Redis, Supervisor, Nginx, and Frappe bench services on your Ubuntu server."
+---
+
+Use these commands to start, stop, restart, and check the status of the services that Frappe and ERPNext depend on.
+
+## Quick reference
+
+| Service | Start | Stop | Restart | Status |
+|---|---|---|---|---|
+| MariaDB | `sudo service mysql start` | `sudo service mysql stop` | `sudo service mysql restart` | `sudo service mysql status` |
+| Redis | `sudo service redis-server start` | `sudo service redis-server stop` | `sudo service redis-server restart` | `sudo service redis-server status` |
+| Supervisor | `sudo service supervisor start` | `sudo service supervisor stop` | `sudo service supervisor restart` | `sudo service supervisor status` |
+| Nginx | `sudo service nginx start` | `sudo service nginx stop` | `sudo service nginx reload` | `sudo service nginx status` |
+
+## MariaDB
+
+Restart the MariaDB (MySQL) database service:
+
+```bash
+sudo service mysql restart
+```
+
+<Note>
+  Always restart MariaDB after editing `/etc/mysql/my.cnf` to apply configuration changes such as the UTF-8 unicode settings required by Frappe.
+</Note>
+
+## Redis
+
+Redis supports `start`, `stop`, `restart`, `force-reload`, and `status` actions:
+
+```bash
+sudo service redis-server {start|stop|restart|force-reload|status}
+```
+
+For example, to restart Redis:
+
+```bash
+sudo service redis-server restart
+```
+
+## Supervisor
+
+Supervisor manages the Frappe worker processes in production. Use `start`, `stop`, `restart`, and `status`:
+
+```bash
+sudo service supervisor start
+sudo service supervisor stop
+sudo service supervisor restart
+sudo service supervisor status
+```
+
+<Tip>
+  If Supervisor fails to start due to an ownership error, edit `/etc/supervisor/supervisord.conf` and set `chown= yourfrappeusername:yourfrappeusername`. See [Troubleshooting common issues](/troubleshooting/common-issues) for details.
+</Tip>
+
+## Nginx
+
+Nginx acts as the reverse proxy in production. Use `reload` instead of `restart` to apply configuration changes without dropping active connections:
+
+```bash
+sudo service nginx start
+sudo service nginx stop
+sudo service nginx reload
+sudo service nginx status
+```
+
+## Bench commands
+
+### `bench restart`
+
+Restarts all Frappe processes managed by Supervisor in a production environment:
+
+```bash
+bench restart
+```
+
+Run this from inside your `frappe-bench` directory after making configuration changes or deploying updates.
+
+### `bench start`
+
+Starts all Frappe processes in development mode using the Procfile:
+
+```bash
+bench start
+```
+
+This command reads from the `Procfile` in your `frappe-bench` directory. If the Procfile does not exist, generate it first.
+
+### `bench setup procfile`
+
+Generates the `Procfile` required by `bench start`:
+
+```bash
+bench setup procfile
+```
+
+Run this command once before starting bench in development mode, or after changing your bench configuration.
+
+## Switching between development and production
+
+To stop production services and switch to development mode:
+
+```bash
+sudo service supervisor stop
+sudo service redis-server stop
+sudo service nginx stop
+
+bench setup procfile
+bench start
+```
+
+To return to production mode:
+
+```bash
+sudo service supervisor start
+sudo service redis-server start
+sudo service nginx start
+```

@@ -1,0 +1,113 @@
+---
+title: "Set up production"
+description: "Configure a dedicated user and run bench setup production to serve Frappe through Nginx and Supervisor."
+---
+
+<Note>
+  This step is only required for production server deployments. If you are running Frappe locally for development, you can skip this entire section.
+</Note>
+
+Running Frappe in production means serving it through Nginx and Supervisor rather than the built-in development server. This setup is more stable, handles restarts automatically, and exposes Frappe on port 80 instead of port 8000.
+
+## Create a dedicated Frappe user
+
+Running Frappe under its own system user keeps permissions clean and reduces security risk.
+
+```bash
+sudo adduser dcode-frappe
+sudo usermod -aG sudo dcode-frappe
+su - dcode-frappe
+python3 -m venv /path/to/my_env
+source /path/to/my_env/bin/activate
+```
+
+Replace `/path/to/my_env` with the actual path where you want the virtual environment, for example `/home/dcode-frappe/env`.
+
+## Set up the bench
+
+<Steps>
+  <Step title="Install frappe-bench">
+    With the virtual environment active, install the `frappe-bench` CLI:
+
+    ```bash
+    pip3 install frappe-bench
+    ```
+
+    Log out and log back in after installation so the `bench` command is available on your `PATH`.
+
+    See [Install frappe-bench](/frappe/install-frappe-bench) for full details.
+  </Step>
+
+  <Step title="Initialize the bench">
+    Create and initialize a new Frappe bench:
+
+    ```bash
+    bench init frappe-bench --frappe-branch version-15
+    ```
+
+    See [Initialize bench](/frappe/initialize-bench) for full details.
+  </Step>
+
+  <Step title="Create a site">
+    Create a new Frappe site inside your bench directory:
+
+    ```bash
+    bench new-site dcode.com
+    ```
+
+    See [Create a site](/frappe/create-site) for full details.
+  </Step>
+
+  <Step title="Install ERPNext">
+    Fetch the ERPNext app and install it on your site:
+
+    ```bash
+    bench get-app erpnext --branch version-15
+    bench --site dcode.com install-app erpnext
+    ```
+
+    See [Install ERPNext](/erpnext/install-erpnext) for full details.
+  </Step>
+
+  <Step title="Run setup production">
+    Run the production setup command, passing the Frappe system user you created:
+
+    ```bash
+    sudo bench setup production dcode-frappe
+    bench restart
+    ```
+
+    This command configures Nginx and Supervisor automatically and enables them as system services.
+  </Step>
+
+  <Step title="Access your server">
+    Open your server's IP address in a web browser. Frappe is now running on port 80 and is proxied through Nginx.
+  </Step>
+</Steps>
+
+## Switch between production and development mode
+
+You may need to temporarily switch to development mode for debugging or testing.
+
+### Stop production and start development mode
+
+```bash
+sudo service supervisor stop
+sudo service redis stop
+sudo service nginx stop
+```
+
+Then start the development server:
+
+```bash
+bench setup procfile
+bench start
+```
+
+### Return to production mode
+
+```bash
+sudo service supervisor start
+sudo service redis start
+sudo service nginx start
+```

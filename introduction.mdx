@@ -1,0 +1,94 @@
+---
+title: "Frappe & ERPNext Installation Guide"
+description: "The complete guide to install Frappe and ERPNext on your Ubuntu system"
+---
+
+## What is Frappe & ERPNext?
+
+**Frappe** is a full-stack, batteries-included web framework built with Python and JavaScript. It powers **ERPNext** — one of the world's most popular open-source Enterprise Resource Planning (ERP) systems, used by thousands of businesses globally.
+
+This guide walks you through every step required to install Frappe and ERPNext on Ubuntu (18.04 or 20.04), from system prerequisites to a fully running production deployment.
+
+<CardGroup cols={2}>
+  <Card title="System Requirements" icon="server" href="/prerequisites/system-requirements">
+    Check hardware and software requirements before you begin
+  </Card>
+  <Card title="Install Dependencies" icon="wrench" href="/prerequisites/install-dependencies">
+    Install Git, Python, Node.js, and all other required packages
+  </Card>
+  <Card title="Database Setup" icon="database" href="/database/install-mariadb">
+    Install and configure MariaDB for Frappe
+  </Card>
+  <Card title="Install Frappe" icon="box" href="/frappe/install-frappe-bench">
+    Install frappe-bench and initialize your first bench
+  </Card>
+  <Card title="Install ERPNext" icon="briefcase" href="/erpnext/install-erpnext">
+    Get and install the ERPNext app on your Frappe site
+  </Card>
+  <Card title="Production Deployment" icon="rocket" href="/production/setup-production">
+    Configure Nginx, Supervisor, and SSL for production
+  </Card>
+</CardGroup>
+
+## Quick Overview
+
+The installation process follows these major phases:
+
+<Steps>
+  <Step title="Install system prerequisites">
+    Set up Python, Node.js, Redis, MariaDB, Yarn, and wkhtmltopdf on your Ubuntu server.
+  </Step>
+  <Step title="Configure MariaDB">
+    Install MariaDB 10.3+, configure it for UTF-8 Unicode support, and secure the installation.
+  </Step>
+  <Step title="Install frappe-bench">
+    Install the `frappe-bench` CLI tool that manages your Frappe environment.
+  </Step>
+  <Step title="Initialize a bench">
+    Run `bench init` to create a new Frappe bench with the desired version branch.
+  </Step>
+  <Step title="Create a site">
+    Use `bench new-site` to create a Frappe site backed by your MariaDB database.
+  </Step>
+  <Step title="Install ERPNext">
+    Fetch the ERPNext app with `bench get-app` and install it onto your site.
+  </Step>
+  <Step title="(Optional) Set up production">
+    Configure Nginx and Supervisor for a production-grade deployment with SSL.
+  </Step>
+</Steps>
+
+## Supported Platforms
+
+| Platform | Status |
+|---|---|
+| Ubuntu 20.04 LTS | Fully supported |
+| Ubuntu 18.04 LTS | Supported |
+| Arch Linux | Community supported |
+
+<Note>
+  This guide targets Ubuntu 20.04 as the primary platform. Ubuntu 18.04 steps are called out where they differ. For Arch Linux, see the dedicated ArchLinux section in the Troubleshooting tab.
+</Note>
+
+## Key Components
+
+| Component | Version | Purpose |
+|---|---|---|
+| Python | 3.6+ | Frappe backend runtime |
+| Node.js | 20.x | Frontend asset build toolchain |
+| MariaDB | 10.3+ | Primary relational database |
+| Redis | 5+ | Caching and real-time updates |
+| Yarn | 1.12+ | JavaScript package manager |
+| wkhtmltopdf | 0.12.5 | PDF generation |
+| Nginx | Latest | Reverse proxy for production |
+| Supervisor | Latest | Process manager for production |
+
+## Before You Start
+
+<Warning>
+  Always back up your data before making changes to a production system. If you are upgrading an existing installation, review the [Frappe upgrade guide](https://frappeframework.com/docs) first.
+</Warning>
+
+<Tip>
+  Running this on a fresh Ubuntu server? Follow the guide top-to-bottom — every step builds on the previous one. If you are installing locally for development, you can skip the Production Deployment section.
+</Tip>

@@ -1,0 +1,71 @@
+---
+title: "Initialize bench script"
+description: "The init_frappe_bench.sh script initializes a Frappe bench directory and starts the development server."
+---
+
+The `init_frappe_bench.sh` script initializes a new `frappe-bench` directory using the Frappe branch you specify, then activates the virtual environment and starts the bench.
+
+## How to run
+
+```bash
+./init_frappe_bench.sh [frappe_branch]
+```
+
+## Parameters
+
+| Parameter | Required | Default | Description |
+|---|---|---|---|
+| `frappe_branch` | No | `version-15` | The Frappe branch to initialize |
+
+## Examples
+
+Initialize with the default branch (version-15):
+
+```bash
+./init_frappe_bench.sh
+```
+
+Initialize with a specific branch:
+
+```bash
+./init_frappe_bench.sh version-14
+```
+
+## Script source
+
+```bash
+#!/bin/bash
+
+# Input:
+#   - Frappe branch (optional): Default to version-15
+FRAPPE_BRANCH="${1:-version-15}"
+
+
+# Initialize the Frappe bench
+bench init frappe-bench --frappe-branch ${FRAPPE_BRANCH}
+
+# Start the bench
+cd frappe-bench
+source env/bin/activate
+bench start
+
+echo "Frappe bench initialized successfully!"
+```
+
+## What the script does
+
+<Steps>
+  <Step title="Read the branch parameter">
+    Uses the first argument passed to the script as the Frappe branch. If no argument is provided, it defaults to `version-15`.
+  </Step>
+  <Step title="Initialize the bench">
+    Runs `bench init frappe-bench --frappe-branch <branch>`. This creates a `frappe-bench/` directory, clones the Frappe repository, and sets up the Python virtual environment inside it.
+  </Step>
+  <Step title="Activate the environment and start the bench">
+    Changes into the `frappe-bench/` directory, activates the virtual environment, and runs `bench start` to launch the development server.
+  </Step>
+</Steps>
+
+<Note>
+  `bench start` keeps the process running in the foreground. To create a site after initialization, open a new terminal session inside the `frappe-bench/` directory and run `create_frappe_site.sh`.
+</Note>

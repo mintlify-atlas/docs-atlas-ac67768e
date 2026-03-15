@@ -1,0 +1,145 @@
+---
+title: "Linux commands"
+description: "User and login management commands for Linux systems used in Frappe server administration."
+---
+
+Use these commands to inspect user accounts, group memberships, and login activity on your Linux server.
+
+## User information commands
+
+| Command | Description |
+|---|---|
+| `id username` | Show the user's UID, GID, and supplementary group IDs |
+| `groups username` | List all groups the user belongs to |
+| `finger username` | Display user details including name, home directory, and shell |
+| `getent passwd username` | Fetch user account info from the system database |
+| `grep username /etc/passwd` | Search directly in the passwd file for a user entry |
+| `lslogins -u` | Display a summary table of all user accounts |
+
+## Active session commands
+
+| Command | Description |
+|---|---|
+| `users` | List the usernames of everyone currently logged in |
+| `who -u` | Show logged-in users with their terminal, login time, and idle status |
+| `w` | Display logged-in users and their current process activity |
+
+## Login history commands
+
+| Command | Description |
+|---|---|
+| `last` | Show the most recent login sessions for all users |
+| `last -ap now` | Show only users who are currently logged in |
+| `lastb` | Show failed login attempts (requires root) |
+| `lastlog` | List the most recent login for every user account |
+| `lastlog -u username` | Show the most recent login for a specific user |
+
+## Command details and examples
+
+### `id` — show user and group IDs
+
+```bash
+id username
+```
+
+Outputs the user ID (UID), primary group ID (GID), and all supplementary group memberships. Useful for verifying that your Frappe user has the correct group assignments.
+
+### `groups` — view user group memberships
+
+```bash
+groups username
+```
+
+Lists every group the user belongs to. Use this to confirm that the Frappe user is a member of `sudo` and any other required groups.
+
+### `finger` — show user information
+
+```bash
+finger username
+```
+
+Displays the user's full name, home directory, login shell, and last login time. The `finger` package may need to be installed separately: `sudo apt install finger`.
+
+### `getent passwd` — fetch user info from system database
+
+```bash
+getent passwd username
+```
+
+Retrieves user account information from the Name Service Switch (NSS) database. Returns a colon-delimited line in the format `username:x:UID:GID:comment:home:shell`.
+
+### `grep` — search for user in passwd file
+
+```bash
+grep username /etc/passwd
+```
+
+Searches `/etc/passwd` directly for a matching user entry. Returns the full record line if the user exists.
+
+### `lslogins` — display user information in Linux
+
+```bash
+lslogins -u
+```
+
+Prints a formatted table of user accounts, showing UID, username, number of running processes, last login time, and more. The `-u` flag limits output to regular user accounts (UID ≥ 1000).
+
+### `users` — list current logged-in users
+
+```bash
+users
+```
+
+Prints a space-separated list of usernames on a single line. A username appears multiple times if the user has multiple active sessions.
+
+### `who -u` — show logged-in users with details
+
+```bash
+who -u
+```
+
+Shows each logged-in user's name, terminal, login time, idle duration, and process ID. The `-u` flag adds the idle time and PID columns.
+
+### `w` — show logged-in user activity
+
+```bash
+w
+```
+
+Combines information from `uptime` and `who`, and adds the current command each user is running. The output includes CPU usage per session.
+
+### `last` — show most recent login sessions
+
+```bash
+# Show all recent login sessions
+last
+
+# Show only users currently logged in
+last -ap now
+```
+
+`last` reads from `/var/log/wtmp` and displays sessions in reverse chronological order, including the terminal used and session duration. The `-ap now` variant filters the list to sessions that are still active.
+
+### `lastb` — show failed login attempts
+
+```bash
+sudo lastb
+```
+
+Reads from `/var/log/btmp` to list failed authentication attempts. Requires root privileges. Use this to audit brute-force attempts against your server.
+
+<Warning>
+  `lastb` requires root or `sudo` to read `/var/log/btmp`. The file may not exist on all systems until at least one failed login has occurred.
+</Warning>
+
+### `lastlog` — list user login information
+
+```bash
+# Show last login for all users
+lastlog
+
+# Show last login for a specific user
+lastlog -u username
+```
+
+Reads from `/var/log/lastlog` and displays the most recent login time, terminal, and source host for every user account on the system. Use `-u username` to filter to a single account.

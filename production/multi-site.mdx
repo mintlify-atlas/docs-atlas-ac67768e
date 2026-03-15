@@ -1,0 +1,112 @@
+---
+title: "Configure multiple sites"
+description: "Run multiple Frappe sites on one bench using DNS-based multitenancy or port-based routing."
+---
+
+Frappe supports two approaches for hosting multiple sites on a single bench. Choose the one that fits your infrastructure:
+
+- **DNS-based multitenancy** — each site has its own domain name. Nginx routes requests to the correct site based on the `Host` header. This is the recommended approach for production.
+- **Port-based multi-site** — each site listens on a different port. Useful when you cannot configure separate DNS records or need to test multiple sites on a single IP.
+
+<Tabs>
+  <Tab title="DNS-based multitenancy">
+    <Note>
+      Use DNS-based multitenancy when each site has a unique domain name (for example, `site1.com` and `site2.com`) and you have control over DNS records. This is the standard production setup.
+    </Note>
+
+    Enable DNS-based multitenancy so Nginx routes by hostname:
+
+    ```bash
+    bench config dns_multitenant on
+    ```
+
+    After enabling it, create your additional sites with `bench new-site`, regenerate the Nginx config, and reload Nginx:
+
+    ```bash
+    bench new-site site2name
+    bench setup nginx
+    sudo service nginx reload
+    ```
+
+    To disable DNS-based multitenancy:
+
+    ```bash
+    bench config dns_multitenant off
+    ```
+  </Tab>
+
+  <Tab title="Port-based multi-site">
+    <Note>
+      Use port-based routing when you cannot assign separate domain names to each site, for example during local testing or when running multiple staging environments on one server.
+    </Note>
+
+    <Steps>
+      <Step title="Disable DNS multitenancy">
+        Port-based routing requires DNS multitenancy to be off:
+
+        ```bash
+        bench config dns_multitenant off
+        ```
+      </Step>
+
+      <Step title="Create the new site">
+        ```bash
+        bench new-site site2name
+        ```
+      </Step>
+
+      <Step title="Assign a port to the new site">
+        Set the Nginx port for the new site. Each site must have a unique port:
+
+        ```bash
+        bench set-nginx-port site2name 82
+        ```
+      </Step>
+
+      <Step title="Regenerate the Nginx configuration">
+        ```bash
+        bench setup nginx
+        ```
+      </Step>
+
+      <Step title="Reload Nginx">
+        Apply the updated configuration:
+
+        ```bash
+        sudo service nginx reload
+        ```
+      </Step>
+
+      <Step title="Restart Supervisor">
+        Restart Supervisor so it picks up the new site's workers:
+
+        ```bash
+        sudo service supervisor restart
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Redis port configuration
+
+If you need Redis to listen on a non-default port, edit the Redis configuration file:
+
+```bash
+sudo nano /etc/redis/redis.conf
+```
+
+Find the `port` directive and change it to `11000`, commenting out the original `6379` line:
+
+```ini
+# port 6379
+port 11000
+```
+
+Save the file and restart Redis. Then test the new port is responding:
+
+```bash
+redis-cli -h localhost -p 11001 ping
+```
+
+A `PONG` response confirms Redis is listening on the new port.

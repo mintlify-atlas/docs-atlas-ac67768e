@@ -1,0 +1,150 @@
+---
+title: "Configure services scripts"
+description: "Scripts to configure Supervisor, Nginx, Redis, and production for your Frappe site."
+---
+
+Once your site is created, use these four scripts to configure the services that keep Frappe running in production.
+
+<AccordionGroup>
+  <Accordion title="config_supervisor.sh — Configure Supervisor" icon="circle-check">
+    Sets up Supervisor to manage Frappe worker processes for a site.
+
+    **How to run**
+
+    ```bash
+    ./config_supervisor.sh [site_name]
+    ```
+
+    | Parameter | Required | Description |
+    |---|---|---|
+    | `site_name` | Yes | The name of the Frappe site to configure Supervisor for |
+
+    **Script source**
+
+    ```bash
+    #!/bin/bash
+
+    # Input:
+    #   - Site name: Required
+    SITE_NAME="$1"
+
+    # Configure supervisor for the site
+    bench --site ${SITE_NAME} setup supervisor
+
+    # Create a symbolic link to the supervisor configuration file
+    sudo ln -s pwd/config/supervisor.conf /etc/supervisor/conf.d/frappe-bench.conf
+
+    echo "Supervisor configured for site '${SITE_NAME}'!"
+    ```
+
+    The script runs `bench setup supervisor` to generate a Supervisor config, then symlinks it into `/etc/supervisor/conf.d/` so Supervisor picks it up automatically.
+  </Accordion>
+
+  <Accordion title="config_nginx.sh — Configure Nginx" icon="server">
+    Sets up Nginx as a reverse proxy for your Frappe site.
+
+    **How to run**
+
+    ```bash
+    ./config_nginx.sh [site_name]
+    ```
+
+    | Parameter | Required | Description |
+    |---|---|---|
+    | `site_name` | Yes | The name of the Frappe site to configure Nginx for |
+
+    **Script source**
+
+    ```bash
+    #!/bin/bash
+
+    # Input:
+    #   - Site name: Required
+    SITE_NAME="$1"
+
+    # Configure Nginx for the site
+    bench --site ${SITE_NAME} setup nginx
+
+    # Create a symbolic link to the Nginx configuration file
+    sudo ln -s pwd/config/nginx.conf /etc/nginx/conf.d/frappe-bench.conf
+
+    echo "Nginx configured for site '${SITE_NAME}'!"
+    ```
+
+    The script runs `bench setup nginx` to generate an Nginx config, then symlinks it into `/etc/nginx/conf.d/` so Nginx loads it on the next reload.
+  </Accordion>
+
+  <Accordion title="config_redis.sh — Configure Redis" icon="database">
+    Configures Redis caching and queuing for your Frappe site.
+
+    **How to run**
+
+    ```bash
+    ./config_redis.sh [site_name]
+    ```
+
+    | Parameter | Required | Description |
+    |---|---|---|
+    | `site_name` | Yes | The name of the Frappe site to configure Redis for |
+
+    **Script source**
+
+    ```bash
+    #!/bin/bash
+
+    # Input:
+    #   - Site name: Required
+    SITE_NAME="$1"
+
+    # Configure Redis for the site (optional, but recommended for production)
+    bench --site ${SITE_NAME} setup redis
+
+    # Edit the Redis configuration file if needed:
+    # sudo nano /etc/redis/redis.conf
+
+    echo "Redis configured for site '${SITE_NAME}'!"
+    ```
+
+    <Tip>
+      After running this script, you can fine-tune Redis settings by editing `/etc/redis/redis.conf` directly.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="config_production_site.sh — Set up production" icon="rocket">
+    Runs the full production setup for a site under a specific system user.
+
+    **How to run**
+
+    ```bash
+    ./config_production_site.sh [site_name] [frappe_user]
+    ```
+
+    | Parameter | Required | Description |
+    |---|---|---|
+    | `site_name` | Yes | The name of the Frappe site to set up for production |
+    | `frappe_user` | Yes | The system user that owns the Frappe bench (e.g. `frappe-user`) |
+
+    **Script source**
+
+    ```bash
+    #!/bin/bash
+
+    # Input:
+    #   - Site name: Required
+    #   - Frappe user: Required (e.g., dcode-frappe)
+    SITE_NAME="$1"
+    FRAPPE_USER="$2"
+
+    # Configure the production site
+    sudo bench --site ${SITE_NAME} setup production ${FRAPPE_USER}
+
+    echo "Production site '${SITE_NAME}' configured successfully!"
+    ```
+
+    This script runs `bench setup production` with `sudo`, which configures Supervisor, Nginx, and system services under the specified user in a single step.
+
+    <Note>
+      If you have already run `config_supervisor.sh`, `config_nginx.sh`, and `config_redis.sh` individually, you can use this script instead as a combined alternative.
+    </Note>
+  </Accordion>
+</AccordionGroup>

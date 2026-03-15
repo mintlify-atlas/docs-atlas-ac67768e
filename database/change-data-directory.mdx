@@ -1,0 +1,116 @@
+---
+title: Change the data directory
+description: Move the MariaDB data directory to a new location, for example to a larger or dedicated disk partition.
+---
+
+By default, MariaDB stores all database files under `/var/lib/mysql`. If that partition is running low on space or you want to use a dedicated disk, you can relocate the data directory without losing any data.
+
+<Warning>
+  This operation directly modifies your database storage. A single misconfiguration can cause data loss or prevent MariaDB from starting. **Back up all databases before proceeding.** Use `mysqldump` or your preferred backup tool to create a full backup first.
+</Warning>
+
+<Steps>
+  <Step title="Stop MariaDB">
+    Shut down the MariaDB service before moving any files:
+
+    ```bash
+    sudo service mysql stop
+    ```
+
+    On Ubuntu 18.04 or later you can also use:
+
+    ```bash
+    sudo systemctl stop mariadb
+    ```
+
+    Confirm the service is no longer running before continuing.
+  </Step>
+
+  <Step title="Copy the data to the new directory">
+    Use `rsync` to copy all existing database files to the new location. Replace `/path/to/new/directory` with the actual path you want to use:
+
+    ```bash
+    sudo rsync -av /var/lib/mysql/* /path/to/new/directory
+    ```
+
+    The `-a` flag preserves file permissions, ownership, and timestamps. The `-v` flag shows progress so you can confirm all files are transferred.
+
+    <Note>
+      Ensure the destination partition has enough free space to hold a full copy of `/var/lib/mysql` before running this command.
+    </Note>
+  </Step>
+
+  <Step title="Set correct ownership">
+    MariaDB runs as the `mysql` system user. Set ownership on the new directory so the service can read and write its files:
+
+    ```bash
+    sudo chown -R mysql:mysql /path/to/new/directory
+    ```
+  </Step>
+
+  <Step title="Update the MariaDB configuration">
+    Open the MariaDB configuration file. Depending on your system, the relevant file may be either of the following:
+
+    ```bash
+    sudo nano /etc/mysql/my.cnf
+    ```
+
+    or
+
+    ```bash
+    sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+    ```
+
+    Find the line that sets `datadir` and update it to point to the new directory:
+
+    ```ini
+    datadir = /path/to/new/directory
+    ```
+
+    Save the file and exit (`Ctrl+X`, `Y`, `Enter` in nano).
+  </Step>
+
+  <Step title="Start MariaDB">
+    Start the MariaDB service with the new data directory:
+
+    ```bash
+    sudo service mysql start
+    ```
+
+    On Ubuntu 18.04 or later:
+
+    ```bash
+    sudo systemctl start mariadb
+    ```
+  </Step>
+
+  <Step title="Verify the database is accessible">
+    Connect to MariaDB and confirm your databases are intact:
+
+    ```bash
+    sudo mysql -u root -p
+    ```
+
+    Then run:
+
+    ```sql
+    SHOW DATABASES;
+    ```
+
+    You should see all your existing databases. Type `EXIT;` to close the shell.
+  </Step>
+
+  <Step title="Restart the Frappe bench (if applicable)">
+    If you have an active Frappe bench, restart it so it picks up the new database connection:
+
+    ```bash
+    bench restart
+    ```
+  </Step>
+</Steps>
+
+## Additional notes
+
+- **Disk space**: Confirm the new partition has sufficient space before starting. The `df -h` command shows available space on each mounted filesystem.
+- **File system permissions**: If the new directory is on a filesystem with different mount options (such as `noexec` or `nosuid`), adjust mount flags so MariaDB can operate normally.
+- **Original directory**: Once you have verified everything works, you can remove the original `/var/lib/mysql` contents to reclaim disk space — but only after confirming the new location is fully operational.

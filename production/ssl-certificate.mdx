@@ -1,0 +1,57 @@
+---
+title: "Set up SSL certificate"
+description: "Obtain a free Let's Encrypt SSL certificate for your Frappe site using Certbot."
+---
+
+Let's Encrypt provides free, automatically renewing SSL/TLS certificates. Certbot handles both obtaining the certificate and configuring Nginx to use it.
+
+<Note>
+  Replace `example.com` throughout this page with your actual domain name. The domain must already point to your server's IP address before you run Certbot.
+</Note>
+
+<Steps>
+  <Step title="Add the Certbot PPA">
+    Add the official Certbot package repository to your system:
+
+    ```bash
+    sudo add-apt-repository ppa:certbot/certbot
+    sudo apt update
+    ```
+  </Step>
+
+  <Step title="Install Certbot with the Nginx plugin">
+    Install the `python-certbot-nginx` package, which integrates Certbot directly with your Nginx configuration:
+
+    ```bash
+    sudo apt install python-certbot-nginx
+    ```
+  </Step>
+
+  <Step title="Obtain the certificate">
+    Run Certbot against your domain. Certbot reads your existing Nginx configuration, obtains the certificate, and updates the Nginx config to serve HTTPS automatically:
+
+    ```bash
+    sudo certbot --nginx -d example.com
+    ```
+
+    Follow the interactive prompts to provide an email address and agree to the terms of service.
+  </Step>
+
+  <Step title="Verify the certificate is active">
+    Open `https://example.com` in a browser and confirm the padlock appears. You can also check the certificate details directly:
+
+    ```bash
+    sudo certbot certificates
+    ```
+  </Step>
+</Steps>
+
+## Automatic renewal
+
+Certbot installs a cron job (or systemd timer) that automatically renews certificates before they expire. Let's Encrypt certificates are valid for 90 days and Certbot renews them when they have 30 days or less remaining.
+
+To test that the renewal process works correctly:
+
+```bash
+sudo certbot renew --dry-run
+```

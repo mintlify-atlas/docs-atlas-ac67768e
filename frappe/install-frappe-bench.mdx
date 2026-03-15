@@ -1,0 +1,37 @@
+---
+title: "Install frappe-bench"
+description: "Install the frappe-bench CLI tool to manage your Frappe installation."
+---
+
+frappe-bench is a command-line tool that manages your Frappe environment. It handles initializing the bench directory, managing apps, running services, and creating sites. You install it once with `pip3` and then use the `bench` command for all subsequent Frappe operations.
+
+## Install frappe-bench
+
+<Tabs>
+  <Tab title="Server environment">
+    ```bash
+    pip3 install frappe-bench
+    ```
+  </Tab>
+  <Tab title="Local development">
+    ```bash
+    sudo -H pip3 install frappe-bench
+    ```
+
+    The `-H` flag sets the `HOME` environment variable to the target user's home directory when using `sudo`, which ensures pip installs packages in the correct location.
+  </Tab>
+</Tabs>
+
+<Warning>
+  After installing frappe-bench, you must **log out and log back in** to your terminal session before proceeding. This ensures your shell picks up the updated `PATH` so the `bench` command is available.
+</Warning>
+
+## Verify the installation
+
+After logging back in, confirm the installation was successful:
+
+```bash
+bench --version
+```
+
+You should see a version number printed to your terminal. If the command is not found, confirm that `~/.local/bin` (or the relevant pip bin directory) is included in your `PATH`.

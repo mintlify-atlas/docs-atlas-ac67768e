@@ -1,0 +1,139 @@
+---
+title: "Common issues"
+description: "Solutions to the most frequently encountered problems when installing and running Frappe and ERPNext on Ubuntu."
+---
+
+<AccordionGroup>
+  <Accordion title="Yarn installation errors">
+    If `sudo npm install -g yarn` fails or produces errors, uninstall the existing Yarn installation and remove the binary before reinstalling.
+
+    **Remove the existing installation:**
+
+    ```bash
+    sudo npm uninstall -g yarn
+    sudo rm -rf /usr/bin/yarn
+    ```
+
+    **Reinstall Yarn:**
+
+    ```bash
+    sudo npm install -g yarn
+    ```
+
+    Verify the installation:
+
+    ```bash
+    yarn --version
+    ```
+  </Accordion>
+
+  <Accordion title="MySQL connection error as root">
+    If you receive an authentication error when connecting to MySQL as root (for example, `ERROR 1698 (28000): Access denied for user 'root'@'localhost'`), your root password may be unset or incorrect.
+
+    Follow the step-by-step procedure to reset the MariaDB root password: [Reset MySQL root password](/troubleshooting/reset-mysql-password).
+  </Accordion>
+
+  <Accordion title="bench command not found after install">
+    After running `pip3 install frappe-bench`, the `bench` command is not available in your current terminal session.
+
+    **Solution:** Log out of your terminal and log back in. The shell needs to reload your `PATH` to include the directory where `bench` was installed.
+
+    ```bash
+    # After logging back in, verify the installation
+    bench --version
+    ```
+
+    <Note>
+      If you installed with `sudo -H pip3 install frappe-bench`, the binary may have been placed in `/usr/local/bin`. Confirm it exists with `which bench` after logging back in.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Port conflicts">
+    If Frappe or Redis fails to start because a port is already in use, use the following commands to identify and terminate the conflicting process.
+
+    **Install net-tools if needed:**
+
+    ```bash
+    sudo apt install net-tools
+    ```
+
+    **Check which ports are in use:**
+
+    ```bash
+    sudo netstat -tuln | grep '13000\|11000'
+    ```
+
+    **Find the process using a specific port:**
+
+    ```bash
+    sudo lsof -i :13000
+    ```
+
+    **Kill the conflicting process** (replace `27381` with the actual PID from the `lsof` output):
+
+    ```bash
+    sudo kill 27381
+    ```
+
+    For more details on network debugging, see [Network debugging](/troubleshooting/network-debugging).
+  </Accordion>
+
+  <Accordion title="Supervisor ownership error">
+    If Supervisor fails to start with a permission or ownership error, you need to update the `chown` setting in the Supervisor configuration file.
+
+    **Edit the Supervisor configuration:**
+
+    ```bash
+    sudo nano /etc/supervisor/supervisord.conf
+    ```
+
+    **Find the `[unix_http_server]` section and set the `chown` value** to your Frappe username:
+
+    ```
+    chown= yourfrappeusername:yourfrappeusername
+    ```
+
+    Replace `yourfrappeusername` with the actual Linux user you created for the Frappe installation.
+
+    **Restart Supervisor:**
+
+    ```bash
+    sudo -A systemctl restart supervisor
+    ```
+  </Accordion>
+
+  <Accordion title="Redis port conflict">
+    If Redis fails to start because port 6379 is already in use by another process, change Redis to listen on port 11000.
+
+    **Edit the Redis configuration:**
+
+    ```bash
+    sudo nano /etc/redis/redis.conf
+    ```
+
+    **Find the `port` directive**, comment out the original line, and add a new one:
+
+    ```
+    # port 6379
+    port 11000
+    ```
+
+    **Restart Redis:**
+
+    ```bash
+    sudo service redis-server restart
+    ```
+
+    **Test the new port:**
+
+    ```bash
+    redis-cli -h localhost -p 11000 ping
+    ```
+
+    A response of `PONG` confirms Redis is listening on the new port.
+
+    <Note>
+      If you change the Redis port, update your Frappe bench configuration to point to the new port so that Frappe can connect to Redis.
+    </Note>
+  </Accordion>
+</AccordionGroup>

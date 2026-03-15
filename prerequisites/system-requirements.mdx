@@ -1,0 +1,50 @@
+---
+title: "System requirements"
+description: "Hardware and software requirements for installing Frappe and ERPNext on Ubuntu."
+---
+
+Before you begin the installation, confirm that your system meets the requirements listed on this page. Installing on an underpowered machine is the most common cause of build failures and poor performance.
+
+## Supported operating systems
+
+| Platform | Status |
+|---|---|
+| Ubuntu 20.04 LTS | Fully supported |
+| Ubuntu 18.04 LTS | Supported |
+| Arch Linux | Community supported |
+
+<Note>
+  This guide targets Ubuntu 20.04 as the primary platform. Steps that differ on Ubuntu 18.04 are called out explicitly. Arch Linux is supported by the community — refer to the Troubleshooting section for Arch-specific guidance.
+</Note>
+
+## Hardware requirements
+
+<Note>
+  The minimums below allow Frappe to run. The recommended specs are appropriate for a small production deployment or an active development environment. For large teams or high transaction volumes, provision additional RAM and CPU cores.
+</Note>
+
+| Resource | Minimum | Recommended |
+|---|---|---|
+| RAM | 2 GB | 4 GB or more |
+| CPU | 1 core | 2 cores or more |
+| Disk space | 10 GB | 40 GB or more |
+
+## Software requirements
+
+The following software must be present on your system before you install Frappe. The [Install dependencies](/prerequisites/install-dependencies) page walks you through installing each one.
+
+| Software | Required version | Purpose |
+|---|---|---|
+| Python | 3.6 or later | Frappe backend runtime |
+| Node.js | 14 or later (20.x recommended) | Frontend asset build toolchain |
+| Redis | 5 | Caching and real-time updates |
+| MariaDB | 10.3.x | Primary relational database |
+| Yarn | 1.12 or later | JavaScript package manager |
+| Pip | 20 or later | Python package manager |
+| wkhtmltopdf | 0.12.5 (with patched Qt) | PDF generation |
+| Cron | Any | Automated tasks (backups, certificate renewals) |
+| Nginx | Latest stable | Reverse proxy for production deployments |
+
+<Tip>
+  Node.js 20.x is the version installed by this guide. While Node.js 14+ technically satisfies the minimum, using 20.x ensures you get long-term support and compatibility with the latest Frappe frontend tooling.
+</Tip>

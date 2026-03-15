@@ -1,0 +1,90 @@
+---
+title: Manage MySQL users
+description: Create and manage MariaDB users and privileges for Frappe and ERPNext, including adding new users and resetting the root password.
+---
+
+Frappe requires database credentials to create and manage sites. This page covers how to add new MariaDB users, grant privileges, and update the root password.
+
+## Add a new user
+
+<Steps>
+  <Step title="Connect to MariaDB as root">
+    Open a terminal and connect to the MariaDB shell using the root account:
+
+    ```bash
+    sudo mysql -u root -p
+    ```
+
+    Enter the root password when prompted.
+  </Step>
+
+  <Step title="Create the new user">
+    Replace `new_user` and `password` with your chosen username and a strong password:
+
+    ```sql
+    CREATE USER 'new_user'@'localhost' IDENTIFIED BY 'password';
+    ```
+  </Step>
+
+  <Step title="Grant privileges">
+    Grant the new user full access to all databases:
+
+    ```sql
+    GRANT ALL PRIVILEGES ON *.* TO 'new_user'@'localhost';
+    FLUSH PRIVILEGES;
+    ```
+
+    <Warning>
+      Granting `ALL PRIVILEGES` on `*.*` gives the user unrestricted access to every database on the server. In a production environment, restrict privileges to only the specific databases the user needs — for example, `GRANT ALL PRIVILEGES ON frappe_db.* TO 'new_user'@'localhost';`.
+    </Warning>
+  </Step>
+
+  <Step title="Grant privileges to the admin user (optional)">
+    If you need to grant full administrative access to an `admin` user with the ability to delegate permissions:
+
+    ```sql
+    GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY 'admin' WITH GRANT OPTION;
+    ```
+
+    <Warning>
+      Using a weak password such as `admin` is not suitable for production systems. Replace it with a strong, unique password.
+    </Warning>
+  </Step>
+
+  <Step title="Exit the MySQL shell">
+    ```sql
+    EXIT;
+    ```
+  </Step>
+</Steps>
+
+## Reset the root password
+
+If you need to update the root user's password while already connected as root:
+
+<Steps>
+  <Step title="Connect to MariaDB as root">
+    ```bash
+    sudo mysql -u root -p
+    ```
+  </Step>
+
+  <Step title="Set the new password">
+    Replace `mypass` with your new password:
+
+    ```sql
+    SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mypass');
+    FLUSH PRIVILEGES;
+    ```
+  </Step>
+
+  <Step title="Exit the MySQL shell">
+    ```sql
+    EXIT;
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  If you are locked out of the root account and cannot connect, see [Changing the MySQL Root Password](/troubleshooting/reset-mysql-password) for instructions on resetting the password via safe mode.
+</Note>

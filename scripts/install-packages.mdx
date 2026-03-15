@@ -1,0 +1,131 @@
+---
+title: "Install packages script"
+description: "The install_frappe_packages.sh script installs all required system packages, MariaDB, and frappe-bench in a single run."
+---
+
+The `install_frappe_packages.sh` script handles everything you need before initializing a Frappe bench:
+
+- Updates the package list and installs system dependencies (Git, Python, Redis, Node.js, wkhtmltopdf, and more)
+- Installs MariaDB and configures it for `utf8mb4` Unicode support
+- Creates a Python virtual environment and installs `frappe-bench` via pip
+- Optionally installs Supervisor and Nginx
+
+## How to run
+
+```bash
+./install_frappe_packages.sh
+```
+
+The script requires `sudo` for system-level operations. Run it as a user with sudo privileges.
+
+## Script source
+
+```bash expandable
+#!/bin/bash
+
+# Install required packages
+sudo apt-get update
+sudo apt-get install -y git python3-dev python3-setuptools python3-pip python3.10-venv virtualenv \
+  libmysqlclient-dev redis-server nodejs yarn xvfb libfontconfig wkhtmltopdf \
+  software-properties-common dirmngr apt-transport-https
+
+# Install MariaDB
+sudo apt update
+sudo apt install mariadb-server
+
+# Configure MariaDB for unicode (optional)
+# Define the text to add for each section
+TEXT_TO_ADD_MYSQLD="
+character-set-client-handshake = FALSE
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+"
+
+TEXT_TO_ADD_MYSQL="
+default-character-set = utf8mb4
+"
+
+# Add text to my.cnf, creating sections if they don't exist
+CONFIG_FILE="/etc/mysql/my.cnf"
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: Configuration file '$CONFIG_FILE' not found."
+  exit 1
+fi
+
+# Function to add text to a section if it doesn't already exist
+add_text_to_section() {
+  local section_name="$1"
+  local text_to_add="$2"
+  local config_file="$3"
+
+  if grep -q "\[$section_name\]" "$config_file"; then
+    # Section exists, check if text already exists
+    if ! grep -q "$text_to_add" "$config_file"; then
+      # Text is missing, add it
+      sed -i "/\[$section_name\]/a $text_to_add" "$config_file"
+      echo "Added text to [$section_name] section in '$config_file'."
+    fi
+  else
+    # Section doesn't exist, create it and add the text
+    echo "[$section_name]" >> "$config_file"
+    echo "$text_to_add" >> "$config_file"
+    echo "Created [$section_name] section and added text to '$config_file'."
+  fi
+}
+
+# Add text to [mysqld] and [mysql] sections
+add_text_to_section "mysqld" "$TEXT_TO_ADD_MYSQLD" "$CONFIG_FILE"
+add_text_to_section "mysql" "$TEXT_TO_ADD_MYSQL" "$CONFIG_FILE"
+# Create a virtual environment:
+python3 -m venv my_frappe_env
+source my_frappe_env/bin/activate
+# Install Frappe-bench
+pip3 install frappe-bench
+
+# Optional: Install Supervisor if it's not already installed
+sudo apt install supervisor
+
+# Optional: Install Nginx if it's not already installed
+sudo apt install nginx
+
+echo "Packages installed successfully!"
+```
+
+## What the script does
+
+<Steps>
+  <Step title="Update package list and install system dependencies">
+    Runs `apt-get update` then installs the packages Frappe requires:
+
+    - `git` — version control
+    - `python3-dev`, `python3-pip`, `python3.10-venv`, `virtualenv` — Python toolchain
+    - `libmysqlclient-dev` — MariaDB/MySQL C library for Python bindings
+    - `redis-server` — in-process caching and queue backend
+    - `nodejs`, `yarn` — JavaScript runtime and package manager for the frontend
+    - `wkhtmltopdf`, `xvfb`, `libfontconfig` — PDF generation
+    - `software-properties-common`, `dirmngr`, `apt-transport-https` — repository management utilities
+  </Step>
+  <Step title="Install MariaDB">
+    Installs `mariadb-server` via `apt`.
+  </Step>
+  <Step title="Configure MariaDB for utf8mb4">
+    Checks for `/etc/mysql/my.cnf` and adds Unicode settings to the `[mysqld]` and `[mysql]` sections if they are not already present:
+
+    - `[mysqld]`: sets `character-set-server = utf8mb4`, `collation-server = utf8mb4_unicode_ci`, and disables client handshake
+    - `[mysql]`: sets `default-character-set = utf8mb4`
+
+    <Note>
+      This step is required for full Unicode support, including emoji and multi-byte characters in your Frappe site data.
+    </Note>
+  </Step>
+  <Step title="Create a Python virtual environment and install frappe-bench">
+    Creates `my_frappe_env`, activates it, then installs `frappe-bench` via `pip3`.
+  </Step>
+  <Step title="Install Supervisor and Nginx">
+    Installs `supervisor` and `nginx` so they are available when you configure production later.
+  </Step>
+</Steps>
+
+<Tip>
+  After the script finishes, continue with `init_frappe_bench.sh` to initialize your first bench.
+</Tip>

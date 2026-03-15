@@ -1,0 +1,72 @@
+---
+title: "Configure Supervisor"
+description: "Install Supervisor and configure it to manage Frappe worker and web processes."
+---
+
+Supervisor is a process control system that keeps Frappe's web server, background workers, and scheduler running. If any process crashes, Supervisor restarts it automatically.
+
+<Steps>
+  <Step title="Install Supervisor">
+    Install Supervisor from the Ubuntu package repository:
+
+    ```bash
+    sudo apt -y install supervisor
+    ```
+  </Step>
+
+  <Step title="Generate the Supervisor configuration">
+    From inside your bench directory, generate the Supervisor configuration file:
+
+    ```bash
+    bench setup supervisor
+    ```
+
+    This creates `config/supervisor.conf` inside your bench directory.
+  </Step>
+
+  <Step title="Create the symlink">
+    Link the generated configuration into Supervisor's `conf.d` directory:
+
+    ```bash
+    sudo ln -s `pwd`/config/supervisor.conf /etc/supervisor/conf.d/frappe-bench.conf
+    ```
+
+    Replace `` `pwd` `` with the absolute path to your bench directory if you are not running this command from inside it.
+  </Step>
+
+  <Step title="Set Frappe user ownership in supervisord.conf">
+    Supervisor must run the Frappe processes as your Frappe system user. Open the Supervisor daemon configuration:
+
+    ```bash
+    sudo nano /etc/supervisor/supervisord.conf
+    ```
+
+    Find the `[unix_http_server]` or `[supervisord]` section and set the `chown` directive to your Frappe username:
+
+    ```ini
+    chown= yourfrappeusername:yourfrappeusername
+    ```
+
+    Save the file, then restart Supervisor to apply the change:
+
+    ```bash
+    sudo -A systemctl restart supervisor
+    ```
+  </Step>
+
+  <Step title="Verify the service is running">
+    Confirm Supervisor is active and managing the Frappe processes:
+
+    ```bash
+    sudo service supervisor status
+    ```
+  </Step>
+</Steps>
+
+## Restart Supervisor after configuration changes
+
+After regenerating the Supervisor configuration (for example, after updating workers or adding apps), restart the service:
+
+```bash
+sudo service supervisor restart
+```

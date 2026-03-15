@@ -1,0 +1,160 @@
+---
+title: "Install ERPNext"
+description: "Get the ERPNext app and install it on your Frappe site, with steps for Ubuntu and Arch Linux."
+---
+
+ERPNext is the Frappe app that provides full ERP functionality. You install it into an existing Frappe bench and then attach it to a site.
+
+<Note>
+  This guide uses `version-15` throughout. Replace it with the branch matching your Frappe version if you need a different release.
+</Note>
+
+<Tabs>
+  <Tab title="Ubuntu">
+    <Steps>
+      <Step title="Get the ERPNext app">
+        Download ERPNext into your bench. You can pull it from PyPI or directly from GitHub.
+
+        <CodeGroup>
+
+        ```bash From PyPI
+        bench get-app erpnext --branch version-15
+        ```
+
+        ```bash From GitHub
+        bench get-app https://github.com/frappe/erpnext --branch version-15
+        ```
+
+        </CodeGroup>
+
+        Both commands place ERPNext in the `apps/erpnext` directory inside your bench.
+      </Step>
+
+      <Step title="Install ERPNext on your site">
+        Attach ERPNext to the site you created with `bench new-site`. Replace `dcode.com` with your actual site name.
+
+        ```bash
+        bench --site dcode.com install-app erpnext
+        ```
+      </Step>
+
+      <Step title="Start the bench">
+        Start all bench processes. For development, run this in your bench directory:
+
+        ```bash
+        bench start
+        ```
+      </Step>
+
+      <Step title="Open ERPNext in your browser">
+        Navigate to [http://localhost:8000](http://localhost:8000) (or your configured site URL). You should see the ERPNext setup wizard.
+
+        Log in with the administrator credentials you set when creating the site.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Arch Linux">
+    <Steps>
+      <Step title="Install pre-requisites">
+        Update your system and install all required packages with `pacman`:
+
+        ```bash
+        pacman -Syu
+        pacman -S mariadb redis python2-pip wkhtmltopdf git npm cronie nginx openssl
+        npm install -g yarn
+        ```
+      </Step>
+
+      <Step title="Set up MariaDB">
+        Initialize the database, start the service, and run the secure installation wizard:
+
+        ```bash
+        mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+        systemctl start mariadb
+        mysql_secure_installation
+        ```
+
+        Then open the MariaDB configuration file and add the Unicode settings:
+
+        ```bash
+        nano /etc/mysql/my.cnf
+        ```
+
+        Add the following block:
+
+        ```ini
+        [mysqld]
+        innodb-file-format=barracuda
+        innodb-file-per-table=1
+        innodb-large-prefix=1
+        character-set-client-handshake = FALSE
+        character-set-server = utf8mb4
+        collation-server = utf8mb4_unicode_ci
+
+        [mysql]
+        default-character-set = utf8mb4
+        ```
+
+        Save the file with **Ctrl+X**, then **Y**, then **Enter**.
+      </Step>
+
+      <Step title="Start services">
+        Start MariaDB and Redis:
+
+        ```bash
+        systemctl start mariadb redis
+        ```
+
+        If you need cron (for scheduled tasks and backups), enable it:
+
+        ```bash
+        systemctl enable cronie
+        ```
+      </Step>
+
+      <Step title="Install bench and ERPNext">
+        Clone the bench repository, install it as your local user, and initialise a new bench:
+
+        ```bash
+        git clone https://github.com/frappe/bench bench-repo
+        pip2 install --user -e bench-repo
+        echo "export PATH=$HOME/.local/bin:$PATH" >> ~/.bashrc
+        source ~/.bashrc
+        bench init frappe-bench && cd frappe-bench
+        bench get-app erpnext https://github.com/frappe/erpnext
+        bench new-site site1.local
+        bench --site site1.local install-app erpnext
+        bench use site1.local
+        bench start
+        ```
+      </Step>
+
+      <Step title="Open ERPNext in your browser">
+        Navigate to [http://localhost:8000](http://localhost:8000) to access the ERPNext setup wizard.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Updating Frappe and ERPNext
+
+To switch both apps to a different version branch and pull the latest commits:
+
+```bash
+bench switch-to-branch version-15 frappe erpnext --upgrade
+git pull upstream version-15
+bench get-app --branch=version-15 frappe
+```
+
+Run these commands from inside your bench directory. Replace `version-15` with the target branch if you are upgrading to a different release.
+
+## Adding a frontend
+
+To add a Frappe UI frontend to your bench:
+
+```bash
+bench add-frappe-ui
+```
+
+This sets up the Vue-based frontend layer alongside your existing Frappe apps.

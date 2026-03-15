@@ -1,0 +1,72 @@
+---
+title: "ERPNext configuration"
+description: "Configure environment variables, CSRF settings, DNS multitenancy, and local app installation for ERPNext."
+---
+
+After installing ERPNext, you need to configure it so that external services and API clients can connect to it. This page covers the essential configuration steps.
+
+## Environment variables
+
+Set the following environment variables in your application to enable API integration with ERPNext:
+
+```bash
+ERPNEXT_API_KEY = 'ad43b3e0a015a82'
+ERPNEXT_API_SECRET = 'd550eb2103b2a9b'
+ERPNEXT_URL = 'http://dev.local:8000'
+ERPNEXT_VERSION = 15
+```
+
+| Variable | Description |
+|---|---|
+| `ERPNEXT_API_KEY` | The API key for authenticating requests to the ERPNext REST API. Generate this from the ERPNext user settings. |
+| `ERPNEXT_API_SECRET` | The API secret paired with the key. Treat this like a password — keep it out of version control. |
+| `ERPNEXT_URL` | The base URL of your ERPNext instance, including protocol and port. |
+| `ERPNEXT_VERSION` | The major ERPNext version number. Used by client code to handle version-specific API differences. |
+
+<Note>
+  Replace the example API key and secret above with the real values from your ERPNext instance. You can generate an API key/secret pair from **Settings > My Account > API Access** inside ERPNext.
+</Note>
+
+## Disabling CSRF protection
+
+CSRF protection is enabled by default in Frappe. For local development or direct API access, you can disable it for a specific site:
+
+```bash
+bench --site frappe.localhost set-config ignore_csrf 1
+```
+
+Replace `frappe.localhost` with your actual site name.
+
+<Warning>
+  Only disable CSRF protection in development environments. Never set `ignore_csrf 1` on a production site — doing so exposes your instance to cross-site request forgery attacks.
+</Warning>
+
+## Installing the Frappe app locally
+
+If you need to install or reinstall the Frappe Python package into your bench's virtual environment (for example, after pulling changes or setting up a fresh development environment), run:
+
+```bash
+./env/bin/python -m pip install -q -U -e /apps/frappe
+```
+
+This performs an editable install so that changes you make to the `frappe` source are picked up immediately without reinstalling.
+
+## DNS multitenancy
+
+If you are running multiple sites under different domain names on the same bench, enable DNS-based multitenancy:
+
+```bash
+bench config dns_multitenant on
+```
+
+With DNS multitenancy on, Frappe resolves the correct site based on the incoming `Host` header, so you do not need to pass `--site` to bench commands.
+
+## Setting the current site
+
+When DNS multitenancy is off, Frappe uses a `currentsite.txt` file to determine which site to use for commands that do not specify `--site`. Open the file and write your site name:
+
+```bash
+nano sites/currentsite.txt
+```
+
+Enter your site name (for example, `dcode.com`) and save the file with **Ctrl+X**, then **Y**, then **Enter**.
