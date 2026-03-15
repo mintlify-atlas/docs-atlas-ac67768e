@@ -1,0 +1,115 @@
+{
+  "projectType": "general",
+  "projectName": "Frappe & ERPNext Installation Guide",
+  "projectDescription": "A comprehensive step-by-step guide for installing Frappe framework and ERPNext on Ubuntu (and other Linux systems), covering prerequisites, database setup, production deployment, and automation scripts.",
+  "theme": "linden",
+  "primaryColor": "#b26c55",
+  "lightColor": "#1d2d5a",
+  "darkColor": "#664e5a",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Installation Guide",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["introduction"]
+          },
+          {
+            "group": "Prerequisites",
+            "pages": [
+              "prerequisites/system-requirements",
+              "prerequisites/install-dependencies"
+            ]
+          },
+          {
+            "group": "Database Setup",
+            "pages": [
+              "database/install-mariadb",
+              "database/configure-mariadb",
+              "database/manage-mysql-users",
+              "database/change-data-directory"
+            ]
+          },
+          {
+            "group": "Frappe Installation",
+            "pages": [
+              "frappe/install-frappe-bench",
+              "frappe/initialize-bench",
+              "frappe/create-site"
+            ]
+          },
+          {
+            "group": "ERPNext Setup",
+            "pages": [
+              "erpnext/install-erpnext",
+              "erpnext/configuration"
+            ]
+          },
+          {
+            "group": "Production Deployment",
+            "pages": [
+              "production/setup-production",
+              "production/configure-nginx",
+              "production/configure-supervisor",
+              "production/ssl-certificate",
+              "production/multi-site"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Automation Scripts",
+            "pages": [
+              "scripts/overview",
+              "scripts/install-packages",
+              "scripts/init-bench",
+              "scripts/create-site",
+              "scripts/configure-services"
+            ]
+          },
+          {
+            "group": "Linux Commands",
+            "pages": [
+              "reference/linux-commands",
+              "reference/service-management"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/common-issues",
+              "troubleshooting/reset-mysql-password",
+              "troubleshooting/network-debugging"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Step-by-step Ubuntu installation walkthrough for Frappe and ERPNext",
+    "MariaDB setup and Unicode configuration for multi-language support",
+    "Production deployment with Nginx, Supervisor, and SSL (Let's Encrypt)",
+    "Multi-site configuration with port-based routing",
+    "Automation bash scripts for repeatable installs",
+    "ArchLinux installation instructions",
+    "Database data directory migration guide (Arabic)",
+    "Linux user/login management command reference"
+  ],
+  "publicApiSurface": [
+    "bench init frappe-bench --frappe-branch <version>",
+    "bench new-site <site-name>",
+    "bench get-app erpnext --branch <version>",
+    "bench --site <site-name> install-app erpnext",
+    "bench setup production <user>",
+    "bench setup nginx",
+    "bench setup supervisor",
+    "bench config dns_multitenant on|off",
+    "bench set-nginx-port <site-name> <port>",
+    "bench switch-to-branch <version> frappe erpnext --upgrade"
+  ]
+}
